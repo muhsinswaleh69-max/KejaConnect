@@ -1,6 +1,6 @@
 {
   "name": "keja-connect",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,11 @@
   "dependencies": {
     "next": "14.2.5",
     "react": "^18",
-    "react-dom": "^18",
-    "@supabase/supabase-js": "^2.45.0"
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.0.0",
+    "@types/node": "^20.0.0"
   }
 }
