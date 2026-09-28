@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
-import { supabase } from "../lib/supabase"
-import { countyTowns } from "../lib/counties"
+import { supabase } from "./lib/supabase"
+import { countyTowns } from "./lib/counties"
 
 function SearchInside({label, options, value, onChange, placeholder}: any){
   const [open, setOpen] = useState(false)
@@ -56,12 +56,12 @@ export default function Home(){
           <h1 style={{margin:0, fontSize:'22px'}}>Find your next Keja in {town}</h1>
           <p style={{margin:'6px 0 0 0', fontSize:'13px', color:'#9ca3af'}}>{loading? 'Loading...': `${filtered.length} Kejas in ${town}, ${county} • Live ☁️`}</p>
           <div style={{background:'white', borderRadius:'14px', padding:'12px', marginTop:'16px', display:'flex', gap:'12px', flexWrap:'wrap'}}>
-            <SearchInside label="📍 COUNTY" options={countyList} value={county} onChange={(c:string)=>{setCounty(c); setTown(countyTowns[c][0])}} placeholder="🔍 Type Nairobi, Mombasa..."/>
-            <SearchInside label="🛒 TOWN / MARKET" options={countyTowns[county]||[]} value={town} onChange={setTown} placeholder={`🔍 Search in ${county}...`}/>
+            <SearchInside label="📍 COUNTY" options={countyList} value={county} onChange={(c:string)=>{setCounty(c); setTown(countyTowns[c][0])}} placeholder="🔍 Search inside e.g Nairobi, Mombasa..."/>
+            <SearchInside label="🛒 TOWN / MARKET" options={countyTowns[county]||[]} value={town} onChange={setTown} placeholder={`🔍 Search inside ${county}...`}/>
           </div>
         </div>
         <div style={{marginTop:'18px'}}>
-          {loading? <div style={{background:'white', padding:'24px', borderRadius:'12px', textAlign:'center'}}>Loading...</div>
+          {loading? <div style={{background:'white', padding:'24px', borderRadius:'12px', textAlign:'center'}}>🔄 Loading...</div>
           : filtered.length===0? (
             <div style={{background:'white', padding:'36px', borderRadius:'16px', textAlign:'center', border:'1px dashed #d1d5db'}}>
               <div style={{fontSize:'36px'}}>🏜️</div><h3>No Kejas in {town} yet</h3><a href="/list" style={{display:'inline-block', marginTop:'14px', background:'#111827', color:'white', padding:'11px 18px', borderRadius:'8px', textDecoration:'none', fontWeight:700}}>List House in {town}</a>
