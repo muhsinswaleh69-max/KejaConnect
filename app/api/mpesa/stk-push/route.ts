@@ -1,95 +1,66 @@
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
-
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-
-// Use SERVICE ROLE key for callback (bypasses RLS)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function POST(req: Request) {
   try {
-    const url = new URL(req.url)
-    const kejaId = url.searchParams.get('kejaId') || 'unknown'
-    const type = url.searchParams.get('type') || 'viewing'
-    const phone = url.searchParams.get('phone') || ''
-    const amount = Number(url.searchParams.get('amount') || 0)
-
     const body = await req.json()
-    console.log("🔔 MPESA CALLBACK RECEIVED:", JSON.stringify(body, null, 2))
+    let phone = (body.phone || "").toString().replace(/\D/g,'')
+    if (phone.startsWith('0')) phone = '254' + phone.slice(1)
+    if (phone.startsWith('7')) phone = '254' + phone
+    const amount = Number(body.amount) || 200
+    const kejaId = body.kejaId || '8'
+    const type = body.type || 'viewing'
 
-    const stkCallback = body?.Body?.stkCallback
+    const key = process.env.MPESA_CONSUMER_KEY!
+    const secret = process.env.MPESA_CONSUMER_SECRET!
+    const shortcode = process.env.MPESA_SHORTCODE || '174379'
+    const passkey = process.env.MPESA_PASSKEY || 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+    const callbackUrl = process.env.MPESA_CALLBACK_URL || 'https://keja-connect-nemtqlwof-muhsin9.vercel.app/api/mpesa/callback'
+    const env = process.env.MPESA_ENV || 'sandbox'
 
-    if (!stkCallback) {
-      console.log("No stkCallback in body")
-      return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted but no stkCallback" })
-    }
+    if (!key || !secret) return NextResponse.json({ error: "Missing MPESA keys in Vercel ENV" }, { status: 500 })
 
-    const {
-      MerchantRequestID,
-      CheckoutRequestID,
-      ResultCode,
-      ResultDesc,
-      CallbackMetadata
-    } = stkCallback
+    const auth = Buffer.from(`${key}:${secret}`).toString('base64')
+    const tokenUrl = env === 'sandbox'
+      ? 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+      : 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
 
-    let mpesaReceipt = null
-    let amountPaid = amount
+    const tokenRes = await fetch(tokenUrl, { headers: { Authorization: `Basic ${auth}` } })
+    const tokenText = await tokenRes.text()
+    const tokenData = JSON.parse(tokenText)
+    if (!tokenData.access_token) return NextResponse.json({ error: "Token failed", safaricom: tokenText.slice(0,500) }, { status: 500 })
 
-    if (CallbackMetadata?.Item) {
-      for (const item of CallbackMetadata.Item) {
-        if (item.Name === 'MpesaReceiptNumber') mpesaReceipt = item.Value
-        if (item.Name === 'Amount') amountPaid = item.Value
-      }
-    }
+    const timestamp = new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14)
+    const password = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64')
 
-    const status = ResultCode === 0 ? 'success' : 'failed'
+    const stkUrl = env === 'sandbox'
+      ? 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+      : 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
 
-    // 1. SAVE TO SUPABASE
-    const { error } = await supabase.from('payments').insert({
-      keja_id: kejaId,
-      phone: phone,
-      amount: amountPaid,
-      type: type,
-      checkout_request_id: CheckoutRequestID,
-      merchant_request_id: MerchantRequestID,
-      mpesa_receipt: mpesaReceipt,
-      result_code: ResultCode,
-      result_desc: ResultDesc,
-      status: status,
-      raw_callback: body
+    const stkRes = await fetch(stkUrl, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        BusinessShortCode: shortcode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: amount,
+        PartyA: phone,
+        PartyB: shortcode,
+        PhoneNumber: phone,
+        CallBackURL: `${callbackUrl}?kejaId=${kejaId}&type=${type}&phone=${phone}&amount=${amount}`,
+        AccountReference: `Keja-${kejaId}`,
+        TransactionDesc: `${type}`
+      })
     })
-
-    if (error) {
-      console.error("❌ Supabase insert failed:", error)
-    } else {
-      console.log(`✅ Payment saved: ${status} - ${kejaId} - ${phone} - KSh ${amountPaid}`)
-    }
-
-    // 2. OPTIONAL: If viewing payment success, you can mark keja or create a viewing record
-    if (ResultCode === 0 && type === 'viewing') {
-      // Example: create viewings table if you have it
-      // await supabase.from('viewings').insert({ keja_id: kejaId, phone, paid: true })
-    }
-
-    // 3. ALWAYS return success to Safaricom or they will retry
-    return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted" })
+    const stkText = await stkRes.text()
+    const stkData = JSON.parse(stkText)
+    return NextResponse.json(stkData)
 
   } catch (e: any) {
-    console.error("Callback error:", e)
-    // Still return 0 to Safaricom so they don't keep retrying
-    return NextResponse.json({ ResultCode: 0, ResultDesc: "Accepted with error" })
+    return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
-
-// Safaricom will test with GET sometimes
-export async function GET(req: Request) {
-  const url = new URL(req.url)
-  return NextResponse.json({ 
-    message: "Callback active - waiting for POST from Safaricom",
-    query: Object.fromEntries(url.searchParams.entries())
-  })
-}
+export async function GET(){ return NextResponse.json({ status: "STK API live" }) }
