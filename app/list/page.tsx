@@ -4,7 +4,7 @@ import { useState } from "react"
 const countyTowns: Record<string, string[]> = {
   "Mombasa": ["Mvita","Nyali","Kisauni","Likoni","Changamwe","Jomvu","Tudor","Bamburi"],
   "Kwale": ["Kwale","Ukunda","Msambweni","Kinango","Lunga Lunga","Tiwi","Diani"],
-  "Kilifi": ["Kilifi","Malindi","Watamu","Mariakani","Kaloleni","Mtwapa","Kilifi South"],
+  "Kilifi": ["Kilifi","Malindi","Watamu","Mariakani","Kaloleni","Mtwapa","Kilifi South","Magarini"],
   "Tana River": ["Hola","Garsen","Bura","Madogo","Kipini"],
   "Lamu": ["Lamu","Mokowe","Witu","Faza","Kiunga"],
   "Taita Taveta": ["Voi","Wundanyi","Taveta","Mwatate","Maungu"],
@@ -13,45 +13,46 @@ const countyTowns: Record<string, string[]> = {
   "Mandera": ["Mandera","El Wak","Rhamu","Takaba","Banissa","Lafey"],
   "Marsabit": ["Marsabit","Moyale","Laisamis","North Horr","Sololo"],
   "Isiolo": ["Isiolo","Garbatulla","Merti","Kinna"],
-  "Meru": ["Meru Town","Maua","Nkubu","Timau","Mitunguu","Mikinduri"],
+  "Meru": ["Meru Town","Maua","Nkubu","Timau","Mitunguu","Mikinduri","Marega"],
   "Tharaka Nithi": ["Chuka","Chogoria","Marimanti","Chiakariga","Mitheru"],
   "Embu": ["Embu","Runyenjes","Siakago","Manyatta","Kiritiri"],
-  "Kitui": ["Kitui","Mwingi","Mutomo","Kauwi","Zombe","Mwitika"],
+  "Kitui": ["Kitui","Mwingi","Mutomo","Kauwi","Zombe","Mwitika","Kyuso"],
   "Machakos": ["Machakos","Mavoko","Athi River","Kangundo","Matuu","Kathiani","Mwala"],
   "Makueni": ["Wote","Makindu","Kibwezi","Mtito Andei","Mbooni","Kathonzweni"],
   "Nyandarua": ["Ol Kalou","Kinangop","Nyahururu","Engineer","Njabini","Mai Mahiu"],
-  "Nyeri": ["Nyeri","Karatina","Othaya","Mukurweini","Tetu","Kieni","Chaka"],
-  "Kirinyaga": ["Kerugoya","Kutus","Sagana","Kagio","Kagio","Wanguru"],
-  "Murang'a": ["Murang'a","Thika","Kenol","Kangema","Kandara","Maragua","Kigumo"],
-  "Kiambu": ["Kiambu","Thika","Ruiru","Limuru","Kikuyu","Githunguri","Juja","Gatundu","Kiambu Town"],
+  "Nyeri": ["Nyeri","Karatina","Othaya","Mukurweini","Tetu","Kieni","Chaka","Othaya"],
+  "Kirinyaga": ["Kerugoya","Kutus","Sagana","Kagio","Wanguru"],
+  "Murang'a": ["Murang'a","Thika","Kenol","Kangema","Kandara","Maragua","Kigumo","Gatanga"],
+  "Kiambu": ["Kiambu","Thika","Ruiru","Limuru","Kikuyu","Githunguri","Juja","Gatundu"],
   "Turkana": ["Lodwar","Kakuma","Lokichar","Lokichogio","Kainuk"],
   "West Pokot": ["Kapenguria","Makutano","Chepareria","Sigor","Kacheliba"],
   "Samburu": ["Maralal","Wamba","Baragoi","Archers Post","Kisima"],
   "Trans Nzoia": ["Kitale","Kiminini","Endebess","Kwanza","Saboti","Kachibora"],
   "Uasin Gishu": ["Eldoret","Turbo","Moiben","Kesses","Ainabkoi","Soy","Burnt Forest"],
   "Elgeyo Marakwet": ["Iten","Kapsowar","Chepkorio","Kapcherop","Kaptarakwa"],
-  "Nandi": ["Kapsabet","Nandi Hills","Chepterwai","Kobujoi","Mosoriot","Kaiboi"],
-  "Baringo": ["Kabarnet","Eldama Ravine","Marigat","Kabarnet","Mogotio","Chemolingot"],
+  "Nandi": ["Kapsabet","Nandi Hills","Chepterwai","Kobujoi","Mosoriot","Kaiboi","Chemelil"],
+  "Baringo": ["Kabarnet","Eldama Ravine","Marigat","Mogotio","Chemolingot"],
   "Laikipia": ["Nanyuki","Nyahururu","Rumuruti","Kinamba","Doldol"],
   "Nakuru": ["Nakuru Town","Naivasha","Gilgil","Molo","Njoro","Bahati","Rongai","Subukia"],
   "Narok": ["Narok","Kilgoris","Ololulunga","Suswa","Mara","Lolgorian"],
   "Kajiado": ["Kajiado","Kitengela","Ngong","Ongata Rongai","Kiserian","Loitoktok","Namanga"],
-  "Kericho": ["Kericho","Litein","Londiani","Kipkelion","Fort Ternan"],
-  "Bomet": ["Bomet","Sotik","Chepalungu","Konoin","Bomet East","Chepalungu"],
+  "Kericho": ["Kericho","Litein","Londiani","Kipkelion","Fort Ternan","Kapsoit"],
+  "Bomet": ["Bomet","Sotik","Chepalungu","Konoin","Bomet East"],
   "Kakamega": ["Mumias","Kakamega Town","Malava","Butere","Lugari","Matete","Khwisero","Lurambi","Shinyalu","Ikolomani","Likuyani","Navakholo","Shibale"],
   "Vihiga": ["Vihiga","Luanda","Mbale","Majengo","Emuhaya","Sabatia","Chavakali"],
-  "Bungoma": ["Bungoma Town","Kimilili","Webuye","Sirisia","Bumula","Mt Elgon","Tongaren","Kanduyi","Chwele"],
-  "Busia": ["Busia Town","Malaba","Nambale","Matayos","Teso North","Teso South","Bunyala","Port Victoria"],
-  "Siaya": ["Siaya","Bondo","Ugunja","Yala","Ukwala","Usigu","Rangala"],
+  "Bungoma": ["Bungoma Town","Kimilili","Webuye","Sirisia","Bumula","Mt Elgon","Tongaren","Kanduyi","Chwele","Bungoma"],
+  "Busia": ["Busia Town","Malaba","Nambale","Matayos","Teso North","Teso South","Bunyala","Port Victoria","Busia"],
+  "Siaya": ["Siaya","Bondo","Ugunja","Yala","Ukwala","Usigu"],
   "Kisumu": ["Kisumu Town","Maseno","Ahero","Kombewa","Muhoroni","Nyando","Kisumu East","Kisumu West"],
-  "Homa Bay": ["Homa Bay","Oyugis","Kendubay","Mbita","Ndhiwa","Sindo","Rangwe"],
+  "Homa Bay": ["Homa Bay","Oyugis","Kendubay","Mbita","Ndhiwa","Sindo","Rangwe","Homa Bay Town"],
   "Migori": ["Migori","Rongo","Awendo","Kehancha","Isebania","Suna","Uriri"],
-  "Kisii": ["Kisii Town","Ogembo","Keroka","Suneka","Nyamache","Marani","Kenyenya"],
+  "Kisii": ["Kisii Town","Ogembo","Keroka","Suneka","Nyamache","Marani","Kenyenya","Kisii"],
   "Nyamira": ["Nyamira","Nyansiongo","Ekerubo","Keroka","Manga","Borabu"],
   "Nairobi": ["Westlands","CBD","Karen","Eastlands","Roysambu","Kasaranai","Embakasi","Langata","Dagoretti","Parklands","South B","South C","Kilimani","Lavington"],
 }
 
-const majorCounties = ["Nairobi","Mombasa","Kisumu","Nakuru","Uasin Gishu","Kiambu","Kajiado","Machakos"]
+// UPDATED MAJOR LIST AS PER YOUR NOTE
+const majorCounties = ["Nairobi","Mombasa","Kisumu","Nakuru","Uasin Gishu","Kiambu","Kajiado","Machakos","Nyeri","Nandi","Murang'a","Meru","Kitui","Kisii","Kilifi","Kericho","Homa Bay","Busia","Bungoma","Kakamega"]
 
 export default function ListPage() {
   const [county, setCounty] = useState("Kakamega")
@@ -91,11 +92,11 @@ export default function ListPage() {
   return (
     <div style={{maxWidth:'550px', margin:'20px auto', background:'white', padding:'24px', borderRadius:'16px', border:'1px solid #e5e7eb'}}>
       <h1 style={{fontWeight:800, fontSize:'22px'}}>List Your Keja - All Kenya</h1>
-      <p style={{fontSize:'12px', color:'#6b7280', marginBottom:'16px'}}>47 Counties • Minor KSh 2K / Major KSh 5K</p>
+      <p style={{fontSize:'12px', color:'#6b7280', marginBottom:'16px'}}>20 Major KSh 5K ★ | 27 Minor KSh 2K</p>
 
       <label style={{fontSize:'13px', fontWeight:700}}>① County (47 Counties):</label>
       <select value={county} onChange={e=>handleCountyChange(e.target.value)} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'2px solid #111827', margin:'6px 0 12px', fontWeight:700}}>
-        {Object.keys(countyTowns).sort().map(c=><option key={c} value={c}>{c} County {majorCounties.includes(c)?"★ Major":""}</option>)}
+        {Object.keys(countyTowns).sort().map(c=><option key={c} value={c}>{c} County {majorCounties.includes(c)?"★ MAJOR - 5K":"- Minor 2K"}</option>)}
       </select>
 
       <label style={{fontSize:'13px', fontWeight:700}}>② Town in {county} ({towns.length} towns):</label>
@@ -116,10 +117,10 @@ export default function ListPage() {
       <input value={form.mpesa} onChange={e=>setForm({...form, mpesa:e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #d1d5db', margin:'6px 0 16px'}} placeholder="0722xxxxxx"/>
 
       <div style={{background:isMajor?'#fef2f2':'#f0fdf4', padding:'12px', borderRadius:'10px', fontSize:'13px', marginBottom:'16px', border:'1px solid', borderColor:isMajor?'#fecaca':'#bbf7d0'}}>
-        📍 <b>{county} → {town}</b><br/>🏷️ {isMajor?"Major County - KSh 5,000 Admin":"Minor County - KSh 2,000 Admin"}<br/>💰 Your 80% = KSh {form.rent?Math.round(parseInt(form.rent)*0.8).toLocaleString():0}
+        📍 <b>{county} → {town}</b><br/>🏷️ {isMajor?"★ MAJOR COUNTY - KSh 5,000 Admin Fee":"Minor County - KSh 2,000 Admin Fee"}<br/>💰 Your 80% = KSh {form.rent?Math.round(parseInt(form.rent)*0.8).toLocaleString():0}
       </div>
 
-      <button onClick={handleSubmit} style={{width:'100%', background:'#111827', color:'white', padding:'14px', borderRadius:'10px', border:0, fontWeight:800, cursor:'pointer'}}>List in {town}, {county}</button>
+      <button onClick={handleSubmit} style={{width:'100%', background:'#111827', color:'white', padding:'14px', borderRadius:'10px', border:0, fontWeight:800, cursor:'pointer'}}>List in {town}, {county} - Pay {isMajor?"5K":"2K"}</button>
       <a href="/" style={{display:'block', textAlign:'center', marginTop:'12px', fontSize:'13px', color:'#6b7280', textDecoration:'none'}}>← Back to Kejas</a>
     </div>
   )
