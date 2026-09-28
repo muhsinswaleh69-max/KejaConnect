@@ -87,7 +87,7 @@ function SearchableDropdown({icon, label, options, value, onChange, placeholder}
 }
 
 const defaultKejas = [
-  {id:1, title:"2 Bedroom - Ekero", rent:8000, location:"Ekero, Mumias Town", county:"Kakamega", town:"Mumias", mpesa:"0722", yourCut:1600, toLandlord:6400},
+  {id:1, title:"2 Bedroom - Ekero", rent:8000, location:"Ekero, Mumias Town", county:"Kakamega", town:"Mumias", mpesa:"0722", yourCut:1600, toLandlord:6400, lat:"0.334580", lng:"34.485550"},
   {id:2, title:"Single - Shibale Near MMUST", rent:3500, location:"Shibale, Near MMUST", county:"Kakamega", town:"Mumias", mpesa:"0712", yourCut:700, toLandlord:2800},
 ]
 
@@ -117,10 +117,29 @@ export default function Home(){
           </div>
         </div>
         {filtered.length===0? <div style={{background:'white', padding:'32px', borderRadius:'16px', textAlign:'center', border:'1px dashed #d1d5db'}}><h3>🏜️ No Kejas in {town} yet</h3><p style={{fontSize:'13px', color:'#6b7280'}}>Be first to list in {town}, {county}!</p><a href="/list" style={{display:'inline-block', marginTop:'12px', background:'#111827', color:'white', padding:'10px 18px', borderRadius:'8px', textDecoration:'none', fontWeight:700}}>List Keja in {town}</a></div> :
-          <div className="grid">{filtered.map(k=>(
-            <div key={k.id} className="card"><span className="badge badge-blue">Available</span><h3>{k.title}</h3><div className="meta">📍 {k.town}, {k.county} • {k.location}</div><div className="price">KSh {k.rent.toLocaleString()} / month</div><button className="btn">Book - Pay to Platform</button></div>
-          ))}</div>
+          <div className="grid">
+            {filtered.map((k:any)=>(
+              <div key={k.id} className="card" style={{position:'relative'}}>
+                <div style={{marginBottom:'6px'}}>
+                  <span className="badge badge-blue">Available</span>
+                  {k.lat && <span className="badge" style={{background:'#dcfce7', color:'#166534', marginLeft:'6px', fontSize:'11px'}}>📍 GPS Pinned</span>}
+                </div>
+                <h3 style={{marginTop:'8px'}}>{k.title}</h3>
+                <div className="meta">📍 {k.town}, {k.county} • {k.location}</div>
+                <div className="price">KSh {k.rent.toLocaleString()} / month</div>
+                {k.lat && k.lng && (
+                  <div style={{display:'flex', gap:'8px', margin:'10px 0'}}>
+                    <a href={`https://www.google.com/maps?q=${k.lat},${k.lng}`} target="_blank" style={{flex:1, textAlign:'center', background:'#f3f4f6', padding:'9px', borderRadius:'8px', fontSize:'12px', fontWeight:700, textDecoration:'none', color:'#111827', border:'1px solid #e5e7eb'}}>🗺️ View</a>
+                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${k.lat},${k.lng}`} target="_blank" style={{flex:1, textAlign:'center', background:'#2563eb', padding:'9px', borderRadius:'8px', fontSize:'12px', fontWeight:700, textDecoration:'none', color:'white'}}>📍 Navigate</a>
+                  </div>
+                )}
+                <button className="btn" onClick={()=>alert(`BOOK ${k.title} in ${k.town}`)}>Book - Pay to Platform</button>
+                {k.lat && <div style={{fontSize:'10px', color:'#9ca3af', marginTop:'6px'}}>GPS: {k.lat}, {k.lng}</div>}
+              </div>
+            ))}
+          </div>
         }
+        <div style={{textAlign:'center', marginTop:'30px', fontSize:'11px', color:'#9ca3af'}}><a href="/admin" style={{color:'#9ca3af'}}>Admin</a> • KejaConnect {county} © 2026</div>
       </div>
     </>
   )
