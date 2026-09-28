@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { supabase } from "../../lib/supabase"
+import Link from "next/link"
 
 const COUNTY_TOWNS: Record<string, string[]> = {
   "Mombasa": ["Mombasa Town","Nyali","Kisauni","Likoni","Changamwe","Jomvu","Bamburi"],
@@ -86,12 +87,20 @@ export default function AdminPage(){
 
   return (
     <div style={{maxWidth:1000, margin:'0 auto', padding:16, fontFamily:'sans-serif', background:'#f9fafb', minHeight:'100vh'}}>
-      <h1 style={{fontSize:20, fontWeight:800}}>Skynet Admin - 47 Counties + Commission</h1>
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:10}}>
+        <h1 style={{fontSize:20, fontWeight:800}}>Skynet Admin - 47 Counties</h1>
+        <div style={{display:'flex', gap:8}}>
+          <Link href="/admin/payments" style={{padding:'10px 16px', background:'#f59e0b', color:'white', borderRadius:10, textDecoration:'none', fontWeight:800, fontSize:13, border:'2px solid #111'}}>💰 MY PAYMENTS - 20%</Link>
+          <Link href="/" style={{padding:'10px 14px', background:'white', border:'1px solid #ddd', borderRadius:10, textDecoration:'none', color:'#111', fontSize:12, fontWeight:700}}>🏠 View Site</Link>
+        </div>
+      </div>
+
       <div style={{display:'flex', gap:10, marginTop:10, flexWrap:'wrap'}}>
         <div style={{background:'white', padding:10, borderRadius:10, border:'1px solid #ddd'}}>Total: {kejas.length}</div>
         <div style={{background:'#dcfce7', padding:10, borderRadius:10}}>Vacant: {kejas.filter(k=>!k.is_taken).length}</div>
         <div style={{background:'#fee2e2', padding:10, borderRadius:10}}>Taken: {kejas.filter(k=>k.is_taken).length}</div>
       </div>
+
       <form onSubmit={handleAdd} style={{background:'white', padding:16, borderRadius:12, marginTop:16, border:'1px solid #e5e7eb'}}>
         <div style={{fontWeight:800, marginBottom:10}}>Add New House</div>
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
@@ -121,6 +130,7 @@ export default function AdminPage(){
         <div style={{marginTop:8}}><div style={{fontSize:12, fontWeight:700}}>🎥 Video</div><input type="file" accept="video/*" onChange={e=>setVideoFile(e.target.files?.[0]||null)} style={{marginTop:4}}/></div>
         <button type="submit" disabled={uploading} style={{width:'100%', marginTop:12, padding:12, background:'#111', color:'white', borderRadius:10, fontWeight:800, border:'none'}}>{uploading?'⏳ Uploading...':`✅ UPLOAD - ${county} - ${customTown||town}`}</button>
       </form>
+
       <div style={{marginTop:20, display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px,1fr))', gap:10}}>
         {kejas.map(k=><div key={k.id} style={{background:'white', borderRadius:10, padding:10, border:k.is_taken?'2px solid #fecaca':'2px solid #bbf7d0'}}><div style={{display:'flex', justifyContent:'space-between'}}><b style={{fontSize:13}}>{k.title}</b><span style={{fontSize:10, background:k.is_taken?'#ef4444':'#22c55e', color:'white', padding:'2px 6px', borderRadius:10}}>{k.is_taken?'TAKEN':'VACANT'}</span></div><div style={{fontSize:11, color:'#6b7280'}}>{k.county} - {k.town} - KSh {k.rent} {k.latitude?'📍':''}</div><div style={{display:'flex', gap:6, marginTop:8}}><button onClick={()=>toggleTaken(k)} style={{flex:1, padding:6, fontSize:11, borderRadius:6, border:'1px solid #ddd', background:k.is_taken?'#dcfce7':'#fee2e2'}}>{k.is_taken?'Make VACANT':'Make TAKEN'}</button><button onClick={()=>deleteKeja(k.id)} style={{padding:6, fontSize:11, borderRadius:6, border:'1px solid #fecaca', background:'white'}}>Delete</button></div></div>)}
       </div>
