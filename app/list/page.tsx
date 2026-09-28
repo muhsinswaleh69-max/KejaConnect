@@ -1,124 +1,29 @@
 "use client"
-import { useEffect, useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
+const countyTowns: Record<string, string[]> = {"Mombasa": ["Mvita","Nyali","Kisauni","Likoni","Changamwe","Jomvu"],"Kwale": ["Kwale","Ukunda","Msambweni"],"Kilifi": ["Kilifi","Malindi","Watamu","Mariakani","Mtwapa"],"Tana River": ["Hola","Garsen","Bura"],"Lamu": ["Lamu","Mokowe","Witu"],"Taita Taveta": ["Voi","Wundanyi","Taveta"],"Garissa": ["Garissa","Dadaab"],"Wajir": ["Wajir","Habaswein"],"Mandera": ["Mandera","El Wak"],"Marsabit": ["Marsabit","Moyale"],"Isiolo": ["Isiolo","Garbatulla"],"Meru": ["Meru Town","Maua","Nkubu"],"Tharaka Nithi": ["Chuka","Chogoria"],"Embu": ["Embu","Runyenjes"],"Kitui": ["Kitui","Mwingi","Mutomo"],"Machakos": ["Machakos","Mavoko","Athi River","Kangundo"],"Makueni": ["Wote","Makindu","Kibwezi"],"Nyandarua": ["Ol Kalou","Kinangop"],"Nyeri": ["Nyeri","Karatina","Othaya"],"Kirinyaga": ["Kerugoya","Kutus"],"Murang'a": ["Murang'a","Thika","Kenol","Kangema"],"Kiambu": ["Kiambu","Thika","Ruiru","Limuru","Kikuyu","Juja"],"Turkana": ["Lodwar","Kakuma"],"West Pokot": ["Kapenguria","Makutano"],"Samburu": ["Maralal","Wamba"],"Trans Nzoia": ["Kitale","Kiminini"],"Uasin Gishu": ["Eldoret","Turbo","Moiben","Soy"],"Elgeyo Marakwet": ["Iten","Kapsowar"],"Nandi": ["Kapsabet","Nandi Hills"],"Baringo": ["Kabarnet","Eldama Ravine"],"Laikipia": ["Nanyuki","Nyahururu"],"Nakuru": ["Nakuru Town","Naivasha","Gilgil","Molo"],"Narok": ["Narok","Kilgoris"],"Kajiado": ["Kajiado","Kitengela","Ngong","Ongata Rongai"],"Kericho": ["Kericho","Litein"],"Bomet": ["Bomet","Sotik"],"Kakamega": ["Mumias","Kakamega Town","Malava","Butere","Lugari","Matete","Khwisero","Lurambi","Shinyalu","Ikolomani","Likuyani","Navakholo","Shibale"],"Vihiga": ["Vihiga","Luanda","Mbale","Emuhaya","Sabatia"],"Bungoma": ["Bungoma Town","Kimilili","Webuye","Sirisia","Bumula","Mt Elgon","Tongaren","Kanduyi","Chwele"],"Busia": ["Busia Town","Malaba","Nambale","Matayos","Teso North","Bunyala","Port Victoria"],"Siaya": ["Siaya","Bondo","Ugunja","Yala"],"Kisumu": ["Kisumu Town","Maseno","Ahero","Kombewa","Muhoroni"],"Homa Bay": ["Homa Bay","Oyugis","Kendubay","Mbita"],"Migori": ["Migori","Rongo","Awendo"],"Kisii": ["Kisii Town","Ogembo","Keroka"],"Nyamira": ["Nyamira","Nyansiongo"],"Nairobi": ["Westlands","CBD","Karen","Eastlands","Roysambu","Kasaranai","Embakasi","Langata","Dagoretti","Parklands","Kilimani"]}
 
-const countyTowns: Record<string, string[]> = {
-  "Mombasa": ["Mvita","Nyali","Kisauni","Likoni","Changamwe","Jomvu"],
-  "Kwale": ["Kwale","Ukunda","Msambweni","Kinango"],
-  "Kilifi": ["Kilifi","Malindi","Watamu","Mariakani","Kaloleni","Mtwapa"],
-  "Tana River": ["Hola","Garsen","Bura"],
-  "Lamu": ["Lamu","Mokowe","Witu"],
-  "Taita Taveta": ["Voi","Wundanyi","Taveta"],
-  "Garissa": ["Garissa","Dadaab","Balambala"],
-  "Wajir": ["Wajir","Habaswein","Tarbaj"],
-  "Mandera": ["Mandera","El Wak","Rhamu"],
-  "Marsabit": ["Marsabit","Moyale","Laisamis"],
-  "Isiolo": ["Isiolo","Garbatulla","Merti"],
-  "Meru": ["Meru Town","Maua","Nkubu","Timau"],
-  "Tharaka Nithi": ["Chuka","Chogoria","Marimanti"],
-  "Embu": ["Embu","Runyenjes","Siakago"],
-  "Kitui": ["Kitui","Mwingi","Mutomo"],
-  "Machakos": ["Machakos","Mavoko","Athi River","Kangundo","Matuu"],
-  "Makueni": ["Wote","Makindu","Kibwezi"],
-  "Nyandarua": ["Ol Kalou","Kinangop","Nyahururu"],
-  "Nyeri": ["Nyeri","Karatina","Othaya","Mukurweini"],
-  "Kirinyaga": ["Kerugoya","Kutus","Sagana"],
-  "Murang'a": ["Murang'a","Thika","Kenol","Kangema"],
-  "Kiambu": ["Kiambu","Thika","Ruiru","Limuru","Kikuyu","Juja","Gatundu"],
-  "Turkana": ["Lodwar","Kakuma","Lokichar"],
-  "West Pokot": ["Kapenguria","Makutano","Chepareria"],
-  "Samburu": ["Maralal","Wamba","Baragoi"],
-  "Trans Nzoia": ["Kitale","Kiminini","Endebess"],
-  "Uasin Gishu": ["Eldoret","Turbo","Moiben","Kesses","Soy"],
-  "Elgeyo Marakwet": ["Iten","Kapsowar","Chepkorio"],
-  "Nandi": ["Kapsabet","Nandi Hills","Chepterwai"],
-  "Baringo": ["Kabarnet","Eldama Ravine","Marigat"],
-  "Laikipia": ["Nanyuki","Nyahururu","Rumuruti"],
-  "Nakuru": ["Nakuru Town","Naivasha","Gilgil","Molo","Njoro"],
-  "Narok": ["Narok","Kilgoris","Ololulunga"],
-  "Kajiado": ["Kajiado","Kitengela","Ngong","Ongata Rongai","Kiserian"],
-  "Kericho": ["Kericho","Litein","Londiani"],
-  "Bomet": ["Bomet","Sotik","Chepalungu"],
-  "Kakamega": ["Mumias","Kakamega Town","Malava","Butere","Lugari","Matete","Khwisero","Lurambi","Shinyalu","Ikolomani","Likuyani","Navakholo","Shibale"],
-  "Vihiga": ["Vihiga","Luanda","Mbale","Emuhaya","Sabatia"],
-  "Bungoma": ["Bungoma Town","Kimilili","Webuye","Sirisia","Bumula","Mt Elgon","Tongaren","Kanduyi","Chwele"],
-  "Busia": ["Busia Town","Malaba","Nambale","Matayos","Teso North","Bunyala","Port Victoria"],
-  "Siaya": ["Siaya","Bondo","Ugunja","Yala"],
-  "Kisumu": ["Kisumu Town","Maseno","Ahero","Kombewa","Muhoroni"],
-  "Homa Bay": ["Homa Bay","Oyugis","Kendubay","Mbita","Ndhiwa"],
-  "Migori": ["Migori","Rongo","Awendo","Kehancha"],
-  "Kisii": ["Kisii Town","Ogembo","Keroka","Suneka"],
-  "Nyamira": ["Nyamira","Nyansiongo","Ekerubo"],
-  "Nairobi": ["Westlands","CBD","Karen","Eastlands","Roysambu","Kasaranai","Embakasi","Langata","Dagoretti","Parklands","Kilimani","Lavington"],
+function SearchableDropdown({label, options, value, onChange, placeholder}: any){
+  const [open, setOpen] = useState(false); const [q, setQ] = useState(""); const ref = useRef<HTMLDivElement>(null)
+  useEffect(()=>{const h=(e:any)=>{ if(ref.current &&!ref.current.contains(e.target)) setOpen(false)}; document.addEventListener("mousedown",h); return()=>document.removeEventListener("mousedown",h)},[])
+  const filtered = options.filter((o:string)=> o.toLowerCase().includes(q.toLowerCase()))
+  return (<div ref={ref} style={{position:'relative'}}><div onClick={()=>setOpen(!open)} style={{padding:'12px', borderRadius:'10px', border:open?'2px solid #111827':'1px solid #d1d5db', background:'white', cursor:'pointer', fontWeight:700, display:'flex', justifyContent:'space-between'}}>{value||label} <span>▼</span></div>{open && <div style={{position:'absolute', top:'100%', left:0, right:0, background:'white', border:'1px solid #e5e7eb', borderRadius:'10px', marginTop:'6px', zIndex:30, boxShadow:'0 10px 25px rgba(0,0,0,0.15)'}}><div style={{padding:'8px'}}><input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder={placeholder} style={{width:'100%', padding:'8px 10px', borderRadius:'8px', border:'1px solid #d1d5db', fontSize:'13px'}}/></div><div style={{maxHeight:'200px', overflowY:'auto'}}>{filtered.map((o:string)=><div key={o} onClick={()=>{onChange(o); setOpen(false); setQ("")}} style={{padding:'9px 12px', cursor:'pointer', fontSize:'13px', background:o===value?'#eff6ff':'white'}}>{o}</div>)}</div></div>}</div>)
 }
 
-function SearchableDropdown({label, options, value, onChange, placeholder}: {label:string, options:string[], value:string, onChange:(v:string)=>void, placeholder:string}){
-  const [open, setOpen] = useState(false)
-  const [q, setQ] = useState("")
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(()=>{
-    const h = (e:any)=>{ if(ref.current &&!ref.current.contains(e.target)) setOpen(false)}
-    document.addEventListener("mousedown", h); return ()=>document.removeEventListener("mousedown", h)
-  },[])
-  const filtered = options.filter(o=> o.toLowerCase().includes(q.toLowerCase()))
-  return (
-    <div ref={ref} style={{position:'relative', minWidth:'170px'}}>
-      <div onClick={()=>setOpen(!open)} style={{padding:'11px 12px', borderRadius:'10px', border:open?'2px solid #111827':'1px solid #d1d5db', background:'white', cursor:'pointer', fontWeight:700, fontSize:'13px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-        {value || label} <span style={{fontSize:'11px'}}>▼</span>
-      </div>
-      {open && (
-        <div style={{position:'absolute', top:'100%', left:0, right:0, background:'white', border:'1px solid #e5e7eb', borderRadius:'10px', marginTop:'6px', zIndex:30, boxShadow:'0 10px 25px rgba(0,0,0,0.15)', overflow:'hidden'}}>
-          <div style={{padding:'8px', borderBottom:'1px solid #f3f4f6'}}>
-            <input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder={placeholder} style={{width:'100%', padding:'8px 10px', borderRadius:'8px', border:'1px solid #d1d5db', fontSize:'13px', outline:'none'}}/>
-          </div>
-          <div style={{maxHeight:'200px', overflowY:'auto'}}>
-            {filtered.length===0? <div style={{padding:'10px', fontSize:'13px', color:'#9ca3af'}}>No results</div> :
-              filtered.map(o=>(
-                <div key={o} onClick={()=>{onChange(o); setOpen(false); setQ("")}} style={{padding:'9px 12px', cursor:'pointer', fontSize:'13px', fontWeight:o===value?700:400, background:o===value?'#eff6ff':'white', borderBottom:'1px solid #f9fafb'}}>{o}</div>
-              ))
-            }
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-const defaultKejas = [
-  {id:1, title:"2 Bedroom - Ekero", rent:8000, location:"Ekero, Mumias Town", county:"Kakamega", town:"Mumias", mpesa:"0722", yourCut:1600, toLandlord:6400},
-  {id:2, title:"Single - Shibale Near MMUST", rent:3500, location:"Shibale, Near MMUST", county:"Kakamega", town:"Mumias", mpesa:"0712", yourCut:700, toLandlord:2800},
-]
-
-export default function Home(){
-  const [kejas, setKejas] = useState(defaultKejas)
-  const [county, setCounty] = useState("Kakamega")
-  const [town, setTown] = useState("Mumias")
-
-  useEffect(()=>{
-    const saved = JSON.parse(localStorage.getItem("kejas")||"[]")
-    if(saved.length>0) setKejas([...defaultKejas,...saved])
-  },[])
-
-  const filtered = kejas.filter(k=> k.county===county && k.town===town)
-
-  return (
-    <>
-      <div className="header"><div className="logo">🔑 Keja<span>Connect</span></div><a href="/list" style={{background:'#2563eb', color:'white', padding:'8px 14px', borderRadius:'8px', fontSize:'13px', fontWeight:700, textDecoration:'none'}}> + List Keja</a></div>
-      <div className="container">
-        <div className="hero">
-          <h1>Find your next Keja in {town}</h1>
-          <p>{town}, {county} • {filtered.length} Kejas • Each town has its own wall</p>
-          <div style={{display:'flex', gap:'10px', marginTop:'16px', flexWrap:'wrap', alignItems:'center'}}>
-            <SearchableDropdown label="Select County" options={Object.keys(countyTowns).sort()} value={county} onChange={(c)=>{setCounty(c); setTown(countyTowns[c][0])}} placeholder="Search county... e.g Bungoma"/>
-            <SearchableDropdown label="Select Town" options={countyTowns[county]||[]} value={town} onChange={setTown} placeholder={`Search town in ${county}...`}/>
-            <button onClick={()=>{setCounty("Kakamega"); setTown("Mumias")}} style={{padding:'10px 12px', borderRadius:'10px', border:'1px solid #e5e7eb', background:'white', cursor:'pointer', fontSize:'12px'}}>Reset</button>
-          </div>
-        </div>
-        {filtered.length===0? <div style={{background:'white', padding:'30px', borderRadius:'16px', textAlign:'center'}}>No Kejas in {town} yet. <a href="/list">List one</a></div> :
-          <div className="grid">{filtered.map(k=>(
-            <div key={k.id} className="card"><span className="badge badge-blue">Available</span><h3>{k.title}</h3><div className="meta">📍 {k.town}, {k.county}</div><div className="price">KSh {k.rent.toLocaleString()} / month</div><button className="btn">Book - Pay to Platform</button></div>
-          ))}</div>
-        }
-      </div>
-    </>
-  )
+export default function ListPage(){
+  const [county, setCounty]=useState("Kakamega"); const [town, setTown]=useState("Mumias")
+  const [form, setForm]=useState({title:"",rent:"",location:"",mpesa:""}); const [done,setDone]=useState(false)
+  const handleCountyChange=(c:string)=>{setCounty(c); setTown(countyTowns[c][0])}
+  const handleSubmit=()=>{if(!form.title||!form.rent||!form.mpesa) return alert("Fill all"); const existing=JSON.parse(localStorage.getItem("kejas")||"[]"); const newKeja={id:Date.now(), title:form.title, rent:parseInt(form.rent), location:`${form.location}, ${town}, ${county}`, mpesa:form.mpesa, county, town}; localStorage.setItem("kejas", JSON.stringify([...existing,newKeja])); setDone(true); setTimeout(()=>window.location.href="/",1200)}
+  if(done) return <div style={{maxWidth:'500px', margin:'80px auto', textAlign:'center', background:'white', padding:'30px', borderRadius:'16px'}}><h2>✅ Listed in {town}, {county}!</h2></div>
+  return (<div style={{maxWidth:'550px', margin:'20px auto', background:'white', padding:'24px', borderRadius:'16px', border:'1px solid #e5e7eb'}}>
+    <h1 style={{fontWeight:800, fontSize:'22px'}}>List Your Keja</h1>
+    <label style={{fontSize:'13px', fontWeight:700, marginTop:'12px', display:'block'}}>① County:</label>
+    <SearchableDropdown options={Object.keys(countyTowns).sort()} value={county} onChange={handleCountyChange} placeholder="Search county... e.g Bungoma"/>
+    <label style={{fontSize:'13px', fontWeight:700, marginTop:'12px', display:'block'}}>② Town in {county}:</label>
+    <SearchableDropdown options={countyTowns[county]||[]} value={town} onChange={setTown} placeholder={`Search town in ${county}...`}/>
+    <div style={{marginTop:'16px'}}><label style={{fontSize:'13px', fontWeight:600}}>Keja Title</label><input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} style={{width:'100%',padding:'12px',borderRadius:'10px',border:'1px solid #d1d5db',margin:'6px 0 12px'}} placeholder="e.g. 2 Bedroom - Ekero"/>
+    <label style={{fontSize:'13px',fontWeight:600}}>Rent KSh</label><input type="number" value={form.rent} onChange={e=>setForm({...form,rent:e.target.value})} style={{width:'100%',padding:'12px',borderRadius:'10px',border:'1px solid #d1d5db',margin:'6px 0 12px'}} placeholder="8000"/>
+    <label style={{fontSize:'13px',fontWeight:600}}>Exact Stage</label><input value={form.location} onChange={e=>setForm({...form,location:e.target.value})} style={{width:'100%',padding:'12px',borderRadius:'10px',border:'1px solid #d1d5db',margin:'6px 0 12px'}} placeholder="Near Ekero"/>
+    <label style={{fontSize:'13px',fontWeight:600}}>M-Pesa Number</label><input value={form.mpesa} onChange={e=>setForm({...form,mpesa:e.target.value})} style={{width:'100%',padding:'12px',borderRadius:'10px',border:'1px solid #d1d5db',margin:'6px 0 16px'}} placeholder="0722xxxxxx"/>
+    <button onClick={handleSubmit} style={{width:'100%',background:'#111827',color:'white',padding:'14px',borderRadius:'10px',border:0,fontWeight:800}}>List in {town}, {county}</button></div></div>)
 }
