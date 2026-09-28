@@ -1,54 +1,78 @@
-  const bookHouse = async(e:any)=>{
-    e.preventDefault()
-    if(!tenantName||!tenantPhone||!rentMpesaCode) return alert('Enter Name, Phone & Rent Code')
-    if(rentMpesaCode.toUpperCase()===viewingCode.toUpperCase()) return alert('Rent Code cannot be same as Viewing Code')
-    setPaying(true)
-    const payoutCode=`SKY-${Date.now().toString().slice(-6)}`
-    const receiptNo=`RCPT-${Date.now().toString().slice(-8)}`
-    const now=new Date()
-    
+ "use client"
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export default function KejaDetailPage() {
+  const { id } = useParams() as { id: string }
+  const [keja, setKeja] = useState<any>(null)
+  const [phone, setPhone] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!id) return
+    supabase.from('kejas').select('*').eq('id', id).single().then(({ data }) => setKeja(data))
+  }, [id])
+
+  const payViewing = async () => {
+    if (!phone) return alert("Enter M-Pesa phone e.g. 07...")
+    setLoading(true)
     try {
-      // 20% COMMISSION
-      const rentInt=parseInt(keja.rent)
-      const commission=Math.round(rentInt*0.20)
-      const landlordPayout=rentInt-commission
-      const platformProfit=200+commission
-
-      // 1. Mark house TAKEN
-      const {error:kejaError} = await supabase.from('kejas').update({is_taken:true, status:'TAKEN - PAID', tenant_name:tenantName, tenant_phone:tenantPhone, tenant_id:tenantId, payout_code:payoutCode, payout_at:now.toISOString()}).eq('id',keja.id)
-      if(kejaError) throw kejaError
-
-      const receipt={receiptNo,payoutCode,viewingCode:viewingCode.toUpperCase(),rentMpesaCode:rentMpesaCode.toUpperCase(),houseTitle:keja.title,county:keja.county,town:keja.town,rent:rentInt,viewingFee:200,commission,landlordPayout,platformProfit,totalPaid:rentInt+200,tenantName,tenantPhone,tenantId,landlordName:keja.landlord_name,landlordPhone:keja.phone,date:now.toLocaleString('en-KE'),latitude:keja.latitude,longitude:keja.longitude}
-      setReceiptData(receipt)
-
-      // 2. Insert booking - THIS WAS FAILING BEFORE
-      const {error:bookError} = await supabase.from('bookings').insert({
-        keja_id:keja.id,
-        receipt_no:receiptNo,
-        mpesa_code:rentMpesaCode.toUpperCase(),
-        viewing_mpesa_code:viewingCode.toUpperCase(),
-        tenant_name:tenantName,
-        tenant_phone:tenantPhone,
-        tenant_id:tenantId,
-        rent_amount:rentInt,
-        commission_amount:commission,
-        landlord_payout:landlordPayout,
-        platform_profit:platformProfit,
-        payout_code:payoutCode,
-        landlord_name:keja.landlord_name,
-        landlord_phone:keja.phone
+      const res = await fetch('/api/mpesa/stk-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, amount: 200, kejaId: id, type: 'viewing' })
       })
-      if(bookError) {
-        console.error(bookError)
-        alert(`⚠️ House marked TAKEN but Payment not saved in dashboard: ${bookError.message}\n\nGo to Supabase and run the SQL I gave you to disable RLS.`)
+      const data = await res.json()
+      if (data.ResponseCode === '0') {
+        alert("STK PUSH sent! Check your phone and enter PIN")
       } else {
-        console.log("✅ Booking saved to payments dashboard")
+        alert(JSON.stringify(data))
       }
-
-      setKeja({...keja,is_taken:true}); setStep('receipt')
-    } catch(err:any){
-      alert("❌ Error: "+err.message)
-      console.error(err)
+    } catch (e: any) {
+      alert(e.message)
     }
-    setPaying(false)
+    setLoading(false)
   }
+
+  const payRent = async () => {
+    if (!keja) return
+    if (!phone) return alert("Enter phone")
+    setLoading(true)
+    try {
+      const res = await fetch('/api/mpesa/stk-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, amount: keja.rent, kejaId: id, type: 'rent' })
+      })
+      const data = await res.json()
+      if (data.ResponseCode === '0') {
+        alert("STK PUSH for RENT sent! Check phone")
+      } else {
+        alert(JSON.stringify(data))
+      }
+    } catch (e: any) {
+      alert(e.message)
+    }
+    setLoading(false)
+  }
+
+  if (!keja) return <div className="p-10">Loading keja...</div>
+
+  return (
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold">{keja.title || 'Keja'} - KSh {keja.rent}</h1>
+      <p className="mt-2">{keja.location}</p>
+      <div className="mt-6 space-y-4">
+        <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="07xxxxxxxx" className="border p-3 w-full rounded" />
+        <button onClick={payViewing} disabled={loading} className="bg-black text-white w-full p-3 rounded">📲 PAY KSh 200 VIEWING (STK)</button>
+        <button onClick={payRent} disabled={loading} className="bg-green-600 text-white w-full p-3 rounded">🏠 PAY RENT KSh {keja.rent} (STK) - Auto Split 20/80</button>
+      </div>
+    </div>
+  )
+}
